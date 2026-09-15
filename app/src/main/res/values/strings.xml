@@ -9,6 +9,9 @@
     <string name="difficulty">Сложность игры</string>
     <string name="difficulty_default">Уровень: 3</string>
     <string name="difficulty_value">Уровень: %1$d</string>
+    <string name="birth_date">Дата рождения</string>
+    <string name="select_birth_date">Выбрать дату</string>
+    <string name="selected_birth_date">%1$02d.%2$02d.%3$d</string>
 
     <string-array name="courses">
         <item>1 курс</item>
