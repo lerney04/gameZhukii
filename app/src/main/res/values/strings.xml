@@ -6,6 +6,9 @@
     <string name="male">Мужской</string>
     <string name="female">Женский</string>
     <string name="course">Курс</string>
+    <string name="difficulty">Сложность игры</string>
+    <string name="difficulty_default">Уровень: 3</string>
+    <string name="difficulty_value">Уровень: %1$d</string>
 
     <string-array name="courses">
         <item>1 курс</item>
