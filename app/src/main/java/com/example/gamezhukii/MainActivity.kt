@@ -1,10 +1,10 @@
 package com.example.gamezhukii
 
+import android.app.DatePickerDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
-import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -30,9 +30,6 @@ class MainActivity : AppCompatActivity() {
         selectedBirthDate = Calendar.getInstance().apply {
             if (savedDate != NO_DATE) {
                 timeInMillis = savedDate
-            } else {
-                set(2001, Calendar.JANUARY, 1, 0, 0, 0)
-                set(Calendar.MILLISECOND, 0)
             }
         }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -42,20 +39,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
-        findViewById<CalendarView>(R.id.birthDateCalendar).apply {
-            maxDate = System.currentTimeMillis()
-            date = selectedBirthDate!!.timeInMillis
-            setOnDateChangeListener { _, year, month, dayOfMonth ->
-                selectedBirthDate = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth, 0, 0, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-            }
+        val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
+        updateBirthDateButton()
+        findViewById<Button>(R.id.birthDateButton).setOnClickListener {
+            showBirthDatePicker()
         }
         findViewById<SeekBar>(R.id.difficultySeekBar).setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    difficultyValue.text = getString(R.string.difficulty_value, progress + 1)
+                    difficultyValue.text = difficultyLevels[progress]
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
@@ -74,6 +66,35 @@ class MainActivity : AppCompatActivity() {
         outState.putLong(BIRTH_DATE_KEY, selectedBirthDate?.timeInMillis ?: NO_DATE)
     }
 
+    private fun showBirthDatePicker() {
+        val initialDate = selectedBirthDate ?: return
+        DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                selectedBirthDate = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth, 0, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                updateBirthDateButton()
+            },
+            initialDate.get(Calendar.YEAR),
+            initialDate.get(Calendar.MONTH),
+            initialDate.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            datePicker.maxDate = System.currentTimeMillis()
+        }.show()
+    }
+
+    private fun updateBirthDateButton() {
+        val birthDate = selectedBirthDate ?: return
+        findViewById<Button>(R.id.birthDateButton).text = getString(
+            R.string.selected_birth_date,
+            birthDate.get(Calendar.DAY_OF_MONTH),
+            birthDate.get(Calendar.MONTH) + 1,
+            birthDate.get(Calendar.YEAR)
+        )
+    }
+
     private fun registerPlayer() {
         val fullNameInput = findViewById<EditText>(R.id.fullNameInput)
         val fullName = fullNameInput.text.toString().trim()
@@ -90,6 +111,7 @@ class MainActivity : AppCompatActivity() {
         ) getString(R.string.male) else getString(R.string.female)
         val course = findViewById<Spinner>(R.id.courseSpinner).selectedItemPosition + 1
         val difficulty = findViewById<SeekBar>(R.id.difficultySeekBar).progress + 1
+        val difficultyName = resources.getStringArray(R.array.difficulty_levels)[difficulty - 1]
         val birthDateText = getString(
             R.string.selected_birth_date,
             birthDate.get(Calendar.DAY_OF_MONTH),
@@ -108,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                 player.fullName,
                 player.gender,
                 player.course,
-                player.difficulty,
+                difficultyName,
                 player.birthDate,
                 player.zodiacSign
             )

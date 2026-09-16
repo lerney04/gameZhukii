@@ -123,11 +123,13 @@
             android:text="@string/birth_date"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <CalendarView
-            android:id="@+id/birthDateCalendar"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/birthDateButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="@string/select_birth_date" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/registerButton"
@@ -141,8 +143,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="@drawable/result_background"
-            android:padding="16dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:visibility="gone" />
 
