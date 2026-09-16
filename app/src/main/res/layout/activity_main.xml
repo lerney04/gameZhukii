@@ -98,6 +98,24 @@
             android:max="4"
             android:progress="2" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/difficulty_easy" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/difficulty_hard" />
+        </LinearLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -110,6 +128,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/registerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/register_player" />
+
+        <TextView
+            android:id="@+id/resultText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/result_background"
+            android:padding="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/zodiacContainer"
@@ -124,16 +159,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/zodiac_image"
-                android:src="@drawable/zodiac_aquarius" />
-
-            <TextView
-                android:id="@+id/zodiacSymbol"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="@android:color/white"
-                android:textSize="52sp"
-                android:textStyle="bold" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/zodiac_symbols" />
         </FrameLayout>
 
     </LinearLayout>

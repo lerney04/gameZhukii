@@ -9,10 +9,14 @@
     <string name="difficulty">Сложность игры</string>
     <string name="difficulty_default">Уровень: 3</string>
     <string name="difficulty_value">Уровень: %1$d</string>
+    <string name="difficulty_easy">Легко</string>
+    <string name="difficulty_hard">Сложно</string>
     <string name="birth_date">Дата рождения</string>
-    <string name="select_birth_date">Выбрать дату</string>
     <string name="selected_birth_date">%1$02d.%2$02d.%3$d</string>
     <string name="zodiac_image">Изображение знака зодиака</string>
+    <string name="register_player">Зарегистрировать игрока</string>
+    <string name="full_name_required">Введите ФИО</string>
+    <string name="player_result">Игрок: %1$s\nПол: %2$s\nКурс: %3$d\nСложность: %4$d\nДата рождения: %5$s\nЗнак зодиака: %6$s</string>
 
     <string-array name="courses">
         <item>1 курс</item>
