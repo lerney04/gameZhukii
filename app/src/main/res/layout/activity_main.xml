@@ -111,5 +111,30 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
 
+        <FrameLayout
+            android:id="@+id/zodiacContainer"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/zodiacImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/zodiac_image"
+                android:src="@drawable/zodiac_aquarius" />
+
+            <TextView
+                android:id="@+id/zodiacSymbol"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="52sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
     </LinearLayout>
 </ScrollView>
