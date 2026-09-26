@@ -13,6 +13,7 @@ import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.view.View
+import android.webkit.WebView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupTabs()
+        setupRules()
 
         val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
         val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -89,6 +91,13 @@ class MainActivity : AppCompatActivity() {
             override fun onTabUnselected(tab: TabLayout.Tab) = Unit
             override fun onTabReselected(tab: TabLayout.Tab) = Unit
         })
+    }
+
+    private fun setupRules() {
+        findViewById<WebView>(R.id.rulesWebView).apply {
+            settings.javaScriptEnabled = false
+            loadUrl("file:///android_res/raw/game_rules.html")
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
