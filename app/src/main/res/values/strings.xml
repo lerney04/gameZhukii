@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Жуки</string>
+    <string name="tab_registration">Игрок</string>
+    <string name="tab_rules">Правила</string>
+    <string name="tab_authors">Авторы</string>
+    <string name="tab_settings">Настройки</string>
     <string name="registration_title">Регистрация игрока</string>
     <string name="full_name">ФИО</string>
     <string name="gender">Пол</string>

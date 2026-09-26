@@ -17,6 +17,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.tabs.TabLayout
 import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
@@ -37,6 +38,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        setupTabs()
 
         val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
         val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -59,6 +62,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.registerButton).setOnClickListener {
             registerPlayer()
         }
+    }
+
+    private fun setupTabs() {
+        val tabs = findViewById<TabLayout>(R.id.mainTabs)
+        val contentViews = listOf(
+            findViewById<View>(R.id.registrationTabContent),
+            findViewById<View>(R.id.rulesTabContent),
+            findViewById<View>(R.id.authorsTabContent),
+            findViewById<View>(R.id.settingsTabContent)
+        )
+        listOf(
+            R.string.tab_registration,
+            R.string.tab_rules,
+            R.string.tab_authors,
+            R.string.tab_settings
+        ).forEach { title -> tabs.addTab(tabs.newTab().setText(title)) }
+
+        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                contentViews.forEachIndexed { index, view ->
+                    view.visibility = if (index == tab.position) View.VISIBLE else View.GONE
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+            override fun onTabReselected(tab: TabLayout.Tab) = Unit
+        })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
