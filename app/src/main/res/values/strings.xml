@@ -8,6 +8,14 @@
     <string name="author_photo">Фотография автора</string>
     <string name="author_polkovnikov">Полковников Даниил Романович</string>
     <string name="author_shatokhin">Шатохин Роман Алексеевич</string>
+    <string name="game_settings_title">Настройки игры</string>
+    <string name="game_speed">Скорость игры</string>
+    <string name="max_cockroaches">Максимальное количество тараканов на экране</string>
+    <string name="bonus_interval">Интервал появления бонусов</string>
+    <string name="round_duration">Длительность раунда</string>
+    <string name="level_value">Уровень: %1$d</string>
+    <string name="count_value">%1$d</string>
+    <string name="seconds_value">%1$d сек.</string>
     <string name="registration_title">Регистрация игрока</string>
     <string name="full_name">ФИО</string>
     <string name="gender">Пол</string>

@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         setupTabs()
         setupRules()
         setupAuthors()
+        setupGameSettings()
 
         val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
         val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -108,6 +109,62 @@ class MainActivity : AppCompatActivity() {
             Author(getString(R.string.author_shatokhin), R.drawable.author_shatokhin)
         )
         findViewById<ListView>(R.id.authorsList).adapter = AuthorAdapter(this, authors)
+    }
+
+    private fun setupGameSettings() {
+        val preferences = getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
+        bindSetting(
+            R.id.gameSpeedSeekBar,
+            R.id.gameSpeedValue,
+            SPEED_KEY,
+            preferences.getInt(SPEED_KEY, 2)
+        ) { progress -> getString(R.string.level_value, progress + 1) }
+        bindSetting(
+            R.id.maxCockroachesSeekBar,
+            R.id.maxCockroachesValue,
+            COCKROACHES_KEY,
+            preferences.getInt(COCKROACHES_KEY, 4)
+        ) { progress -> getString(R.string.count_value, progress + 1) }
+        bindSetting(
+            R.id.bonusIntervalSeekBar,
+            R.id.bonusIntervalValue,
+            BONUS_INTERVAL_KEY,
+            preferences.getInt(BONUS_INTERVAL_KEY, 2)
+        ) { progress -> getString(R.string.seconds_value, (progress + 1) * 5) }
+        bindSetting(
+            R.id.roundDurationSeekBar,
+            R.id.roundDurationValue,
+            ROUND_DURATION_KEY,
+            preferences.getInt(ROUND_DURATION_KEY, 2)
+        ) { progress -> getString(R.string.seconds_value, (progress + 1) * 30) }
+    }
+
+    private fun bindSetting(
+        seekBarId: Int,
+        valueId: Int,
+        preferenceKey: String,
+        initialProgress: Int,
+        valueText: (Int) -> String
+    ) {
+        val valueView = findViewById<TextView>(valueId)
+        findViewById<SeekBar>(seekBarId).apply {
+            progress = initialProgress
+            valueView.text = valueText(progress)
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    valueView.text = valueText(progress)
+                    if (fromUser) {
+                        getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
+                            .edit()
+                            .putInt(preferenceKey, progress)
+                            .apply()
+                    }
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+            })
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -219,5 +276,10 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val BIRTH_DATE_KEY = "birth_date"
         const val NO_DATE = -1L
+        const val SETTINGS_NAME = "game_settings"
+        const val SPEED_KEY = "game_speed"
+        const val COCKROACHES_KEY = "max_cockroaches"
+        const val BONUS_INTERVAL_KEY = "bonus_interval"
+        const val ROUND_DURATION_KEY = "round_duration"
     }
 }
