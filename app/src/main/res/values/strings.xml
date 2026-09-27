@@ -4,6 +4,10 @@
     <string name="tab_rules">Правила</string>
     <string name="tab_authors">Авторы</string>
     <string name="tab_settings">Настройки</string>
+    <string name="authors_title">Авторы приложения</string>
+    <string name="author_photo">Фотография автора</string>
+    <string name="author_polkovnikov">Полковников Даниил Романович</string>
+    <string name="author_shatokhin">Шатохин Роман Алексеевич</string>
     <string name="registration_title">Регистрация игрока</string>
     <string name="full_name">ФИО</string>
     <string name="gender">Пол</string>

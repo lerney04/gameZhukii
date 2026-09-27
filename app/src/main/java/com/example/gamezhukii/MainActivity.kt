@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.ListView
 import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.Spinner
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         setupTabs()
         setupRules()
+        setupAuthors()
 
         val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
         val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -98,6 +100,14 @@ class MainActivity : AppCompatActivity() {
             settings.javaScriptEnabled = false
             loadUrl("file:///android_res/raw/game_rules.html")
         }
+    }
+
+    private fun setupAuthors() {
+        val authors = listOf(
+            Author(getString(R.string.author_polkovnikov), R.drawable.author_polkovnikov),
+            Author(getString(R.string.author_shatokhin), R.drawable.author_shatokhin)
+        )
+        findViewById<ListView>(R.id.authorsList).adapter = AuthorAdapter(this, authors)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
