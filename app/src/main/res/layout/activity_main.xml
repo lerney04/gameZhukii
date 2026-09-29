@@ -15,40 +15,9 @@
         android:elevation="4dp"
         android:minHeight="56dp" />
 
-    <FrameLayout
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/mainPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <FrameLayout
-            android:id="@+id/registrationTabContent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <include layout="@layout/tab_registration" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/rulesTabContent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-            <include layout="@layout/tab_rules" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/authorsTabContent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-            <include layout="@layout/tab_authors" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/settingsTabContent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-            <include layout="@layout/tab_settings" />
-        </FrameLayout>
-    </FrameLayout>
+        android:layout_weight="1" />
 </LinearLayout>

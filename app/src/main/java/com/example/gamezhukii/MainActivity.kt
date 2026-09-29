@@ -21,6 +21,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.tabs.TabLayout
 import java.util.Calendar
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
     private var selectedBirthDate: Calendar? = null
@@ -42,58 +44,60 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupTabs()
-        setupRules()
-        setupAuthors()
-        setupGameSettings()
 
-        val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
-        val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
-        updateBirthDateButton()
-        findViewById<Button>(R.id.birthDateButton).setOnClickListener {
-            showBirthDatePicker()
-        }
-        findViewById<SeekBar>(R.id.difficultySeekBar).setOnSeekBarChangeListener(
-            object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    difficultyValue.text = difficultyLevels[progress]
-                }
+        val pager = findViewById<ViewPager2>(R.id.mainPager)
+        pager.post {
+            setupRules()
+            setupAuthors()
+            setupGameSettings()
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+            val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
+            val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
+            updateBirthDateButton()
+            findViewById<Button>(R.id.birthDateButton).setOnClickListener {
+                showBirthDatePicker()
             }
-        )
+            findViewById<SeekBar>(R.id.difficultySeekBar).setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        difficultyValue.text = difficultyLevels[progress]
+                    }
 
-        findViewById<Button>(R.id.registerButton).setOnClickListener {
-            registerPlayer()
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                }
+            )
+
+            findViewById<Button>(R.id.registerButton).setOnClickListener {
+                registerPlayer()
+            }
         }
     }
 
     private fun setupTabs() {
         val tabs = findViewById<TabLayout>(R.id.mainTabs)
-        val contentViews = listOf(
-            findViewById<View>(R.id.registrationTabContent),
-            findViewById<View>(R.id.rulesTabContent),
-            findViewById<View>(R.id.authorsTabContent),
-            findViewById<View>(R.id.settingsTabContent)
+        val pager = findViewById<ViewPager2>(R.id.mainPager)
+
+        val layouts = listOf(
+            R.layout.tab_registration,
+            R.layout.tab_rules,
+            R.layout.tab_authors,
+            R.layout.tab_settings
         )
-        listOf(
-            R.string.tab_registration,
-            R.string.tab_rules,
-            R.string.tab_authors,
-            R.string.tab_settings
-        ).forEach { title -> tabs.addTab(tabs.newTab().setText(title)) }
+        pager.adapter = TabsPagerAdapter(layouts)
+        pager.offscreenPageLimit = layouts.size
 
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                contentViews.forEachIndexed { index, view ->
-                    view.visibility = if (index == tab.position) View.VISIBLE else View.GONE
+        TabLayoutMediator(tabs, pager) { tab, position ->
+            tab.setText(
+                when (position) {
+                    0 -> R.string.tab_registration
+                    1 -> R.string.tab_rules
+                    2 -> R.string.tab_authors
+                    else -> R.string.tab_settings
                 }
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) = Unit
-            override fun onTabReselected(tab: TabLayout.Tab) = Unit
-        })
+            )
+        }.attach()
     }
 
     private fun setupRules() {
