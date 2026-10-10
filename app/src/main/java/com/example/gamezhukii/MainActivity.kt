@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         val pager = findViewById<ViewPager2>(R.id.mainPager)
         pager.post {
+            setupGame()
             setupRules()
             setupAuthors()
             setupGameSettings()
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         val pager = findViewById<ViewPager2>(R.id.mainPager)
 
         val layouts = listOf(
+            R.layout.tab_game,
             R.layout.tab_registration,
             R.layout.tab_rules,
             R.layout.tab_authors,
@@ -91,13 +93,42 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabs, pager) { tab, position ->
             tab.setText(
                 when (position) {
-                    0 -> R.string.tab_registration
-                    1 -> R.string.tab_rules
-                    2 -> R.string.tab_authors
+                    0 -> R.string.tab_game
+                    1 -> R.string.tab_registration
+                    2 -> R.string.tab_rules
+                    3 -> R.string.tab_authors
                     else -> R.string.tab_settings
                 }
             )
         }.attach()
+    }
+
+    private fun setupGame() {
+        val gameView = findViewById<GameView>(R.id.gameView)
+        val scoreView = findViewById<TextView>(R.id.gameScore)
+        val timeView = findViewById<TextView>(R.id.gameTime)
+        val startButton = findViewById<Button>(R.id.startGameButton)
+
+        gameView.onStatsChanged = { stats ->
+            scoreView.text = getString(R.string.score_value, stats.score)
+            timeView.text = getString(R.string.time_value, stats.remainingSeconds)
+        }
+        gameView.onRoundFinished = {
+            startButton.text = getString(R.string.play_again)
+            startButton.visibility = View.VISIBLE
+        }
+        startButton.setOnClickListener {
+            val preferences = getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
+            gameView.start(
+                GameConfig(
+                    speedMultiplier = 0.6f + preferences.getInt(SPEED_KEY, 2) * 0.25f,
+                    maxBugs = preferences.getInt(COCKROACHES_KEY, 4) + 1,
+                    bonusIntervalSeconds = (preferences.getInt(BONUS_INTERVAL_KEY, 2) + 1) * 5,
+                    roundDurationSeconds = (preferences.getInt(ROUND_DURATION_KEY, 2) + 1) * 30
+                )
+            )
+            startButton.visibility = View.GONE
+        }
     }
 
     private fun setupRules() {
