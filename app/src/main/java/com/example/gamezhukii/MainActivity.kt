@@ -108,14 +108,23 @@ class MainActivity : AppCompatActivity() {
         val scoreView = findViewById<TextView>(R.id.gameScore)
         val timeView = findViewById<TextView>(R.id.gameTime)
         val startButton = findViewById<Button>(R.id.startGameButton)
+        val resultPanel = findViewById<View>(R.id.gameResultPanel)
+        val resultText = findViewById<TextView>(R.id.gameResultText)
+        val restartButton = findViewById<Button>(R.id.restartGameButton)
 
         gameView.onStatsChanged = { stats ->
             scoreView.text = getString(R.string.score_value, stats.score)
             timeView.text = getString(R.string.time_value, stats.remainingSeconds)
         }
-        gameView.onRoundFinished = {
-            startButton.text = getString(R.string.play_again)
-            startButton.visibility = View.VISIBLE
+        gameView.onRoundFinished = { stats ->
+            resultText.text = getString(
+                R.string.game_result,
+                stats.score,
+                stats.hits,
+                stats.misses,
+                stats.accuracy
+            )
+            resultPanel.visibility = View.VISIBLE
         }
         startButton.setOnClickListener {
             val preferences = getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
@@ -128,7 +137,9 @@ class MainActivity : AppCompatActivity() {
                 )
             )
             startButton.visibility = View.GONE
+            resultPanel.visibility = View.GONE
         }
+        restartButton.setOnClickListener { startButton.performClick() }
     }
 
     private fun setupRules() {

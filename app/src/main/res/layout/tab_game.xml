@@ -26,12 +26,52 @@
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
     </LinearLayout>
 
-    <com.example.gamezhukii.GameView
-        android:id="@+id/gameView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:contentDescription="@string/game_field" />
+        android:layout_weight="1">
+
+        <com.example.gamezhukii.GameView
+            android:id="@+id/gameView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/game_field" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/gameResultPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/round_finished"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+                <TextView
+                    android:id="@+id/gameResultText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/restartGameButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/play_again" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/startGameButton"

@@ -12,6 +12,8 @@
     <string name="time_value">Время: %1$d</string>
     <string name="start_game">Начать игру</string>
     <string name="play_again">Играть ещё раз</string>
+    <string name="round_finished">Раунд завершён</string>
+    <string name="game_result">Очки: %1$d\nПопадания: %2$d\nПромахи: %3$d\nТочность: %4$d%%</string>
     <string name="authors_title">Авторы приложения</string>
     <string name="author_photo">Фотография автора</string>
     <string name="author_polkovnikov">Полковников Даниил Романович</string>
