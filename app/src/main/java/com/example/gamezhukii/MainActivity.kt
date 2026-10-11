@@ -133,7 +133,8 @@ class MainActivity : AppCompatActivity() {
                     speedMultiplier = 0.6f + preferences.getInt(SPEED_KEY, 2) * 0.25f,
                     maxBugs = preferences.getInt(COCKROACHES_KEY, 4) + 1,
                     bonusIntervalSeconds = (preferences.getInt(BONUS_INTERVAL_KEY, 2) + 1) * 5,
-                    roundDurationSeconds = (preferences.getInt(ROUND_DURATION_KEY, 2) + 1) * 30
+                    roundDurationSeconds =
+                        (preferences.getInt(ROUND_DURATION_KEY, 2).coerceIn(0, 5) + 1) * 15
                 )
             )
             startButton.visibility = View.GONE
@@ -181,8 +182,8 @@ class MainActivity : AppCompatActivity() {
             R.id.roundDurationSeekBar,
             R.id.roundDurationValue,
             ROUND_DURATION_KEY,
-            preferences.getInt(ROUND_DURATION_KEY, 2)
-        ) { progress -> getString(R.string.seconds_value, (progress + 1) * 30) }
+            preferences.getInt(ROUND_DURATION_KEY, 2).coerceIn(0, 5)
+        ) { progress -> getString(R.string.seconds_value, (progress + 1) * 15) }
     }
 
     private fun bindSetting(

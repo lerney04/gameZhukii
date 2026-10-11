@@ -87,6 +87,6 @@
             android:id="@+id/roundDurationSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="9" />
+            android:max="5" />
     </LinearLayout>
 </ScrollView>

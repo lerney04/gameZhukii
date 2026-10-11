@@ -1,6 +1,7 @@
 package com.example.gamezhukii
 
 import kotlin.math.cos
+import kotlin.math.ceil
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -21,7 +22,6 @@ class GameEngine(
 
     private var nextId = 1L
     private var spawnElapsed = 0f
-    private var bonusElapsed = 0f
 
     val isFinished: Boolean
         get() = elapsedSeconds >= config.roundDurationSeconds
@@ -33,9 +33,8 @@ class GameEngine(
         misses = 0
         elapsedSeconds = 0f
         spawnElapsed = 0f
-        bonusElapsed = 0f
         nextId = 1L
-        repeat(minOf(3, config.maxBugs)) { spawnRegularBug() }
+        repeat(minOf(3, config.maxBugs)) { spawnRandomBug() }
     }
 
     fun update(deltaSeconds: Float) {
@@ -49,13 +48,7 @@ class GameEngine(
         val spawnDelay = (1.4f / config.speedMultiplier).coerceAtLeast(0.35f)
         if (spawnElapsed >= spawnDelay && bugs.size < config.maxBugs) {
             spawnElapsed = 0f
-            spawnRegularBug()
-        }
-
-        bonusElapsed += deltaSeconds
-        if (bonusElapsed >= config.bonusIntervalSeconds && bugs.size < config.maxBugs) {
-            bonusElapsed = 0f
-            spawnBug(BugType.RARE)
+            spawnRandomBug()
         }
     }
 
@@ -78,13 +71,18 @@ class GameEngine(
         score = score,
         hits = hits,
         misses = misses,
-        remainingSeconds = (config.roundDurationSeconds - elapsedSeconds)
-            .coerceAtLeast(0f)
-            .toInt()
+        remainingSeconds = ceil(
+            (config.roundDurationSeconds - elapsedSeconds).coerceAtLeast(0f)
+        ).toInt()
     )
 
-    private fun spawnRegularBug() {
-        val type = if (random.nextFloat() < FAST_BUG_CHANCE) BugType.FAST else BugType.NORMAL
+    private fun spawnRandomBug() {
+        val roll = random.nextFloat()
+        val type = when {
+            roll < RARE_BUG_CHANCE -> BugType.RARE
+            roll < RARE_BUG_CHANCE + FAST_BUG_CHANCE -> BugType.FAST
+            else -> BugType.NORMAL
+        }
         spawnBug(type)
     }
 
@@ -102,7 +100,8 @@ class GameEngine(
     }
 
     private companion object {
-        const val FAST_BUG_CHANCE = 0.3f
+        const val FAST_BUG_CHANCE = 0.25f
+        const val RARE_BUG_CHANCE = 0.1f
         const val FULL_CIRCLE = 6.2831855f
         const val MISS_PENALTY = 5
     }

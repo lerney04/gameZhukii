@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF8E1"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:paddingTop="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
         android:paddingBottom="8dp">
         <TextView
             android:id="@+id/gameScore"
@@ -77,6 +79,6 @@
         android:id="@+id/startGameButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_margin="12dp"
         android:text="@string/start_game" />
 </LinearLayout>
