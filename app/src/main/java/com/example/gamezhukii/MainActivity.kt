@@ -121,6 +121,8 @@ class MainActivity : AppCompatActivity() {
         val resultText = findViewById<TextView>(R.id.gameResultText)
         val restartButton = findViewById<Button>(R.id.restartGameButton)
 
+        updateGameAccess()
+
         gameView.onStatsChanged = { stats ->
             scoreView.text = getString(R.string.score_value, stats.score)
             timeView.text = getString(R.string.time_value, stats.remainingSeconds)
@@ -136,6 +138,7 @@ class MainActivity : AppCompatActivity() {
             resultPanel.visibility = View.VISIBLE
         }
         startButton.setOnClickListener {
+            if (activePlayer == null) return@setOnClickListener
             val preferences = getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
             gameView.start(
                 GameConfig(
@@ -231,11 +234,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun selectPlayer(player: PlayerEntity) {
         activePlayer = player
+        updateGameAccess()
         Toast.makeText(
             this,
             getString(R.string.player_selected, player.fullName),
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    private fun updateGameAccess() {
+        val player = activePlayer
+        findViewById<Button>(R.id.startGameButton).isEnabled = player != null
+        findViewById<TextView>(R.id.activePlayerText).text = if (player == null) {
+            getString(R.string.select_player_before_game)
+        } else {
+            getString(R.string.active_player, player.fullName)
+        }
     }
 
     private fun bindSetting(
