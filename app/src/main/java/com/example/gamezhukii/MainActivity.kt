@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -13,6 +14,7 @@ import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import android.view.View
 import android.webkit.WebView
 import androidx.activity.enableEdgeToEdge
@@ -21,16 +23,22 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.tabs.TabLayout
 import java.util.Calendar
+import java.util.concurrent.Executors
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
     private var selectedBirthDate: Calendar? = null
+    private lateinit var database: AppDatabase
+    private val databaseExecutor = Executors.newSingleThreadExecutor()
+    private var savedPlayers: List<PlayerEntity> = emptyList()
+    private var activePlayer: PlayerEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        database = AppDatabase.getInstance(this)
         val savedDate = savedInstanceState?.getLong(BIRTH_DATE_KEY, NO_DATE) ?: NO_DATE
         selectedBirthDate = Calendar.getInstance().apply {
             if (savedDate != NO_DATE) {
@@ -51,6 +59,7 @@ class MainActivity : AppCompatActivity() {
             setupRules()
             setupAuthors()
             setupGameSettings()
+            setupPlayerSelection()
 
             val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
             val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -186,6 +195,49 @@ class MainActivity : AppCompatActivity() {
         ) { progress -> getString(R.string.seconds_value, (progress + 1) * 15) }
     }
 
+    private fun setupPlayerSelection() {
+        findViewById<Button>(R.id.selectPlayerButton).setOnClickListener {
+            val position = findViewById<Spinner>(R.id.savedPlayerSpinner).selectedItemPosition
+            savedPlayers.getOrNull(position)?.let { player ->
+                selectPlayer(player)
+                displayPlayer(player)
+            }
+        }
+        reloadPlayers()
+    }
+
+    private fun reloadPlayers(selectedPlayerId: Long? = null) {
+        databaseExecutor.execute {
+            val players = database.gameDao().players
+            runOnUiThread {
+                savedPlayers = players
+                val names = if (players.isEmpty()) {
+                    listOf(getString(R.string.no_registered_players))
+                } else {
+                    players.map { it.fullName }
+                }
+                findViewById<Spinner>(R.id.savedPlayerSpinner).adapter =
+                    ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
+                findViewById<Button>(R.id.selectPlayerButton).isEnabled = players.isNotEmpty()
+
+                val selectedIndex = players.indexOfFirst { it.id == selectedPlayerId }
+                if (selectedIndex >= 0) {
+                    findViewById<Spinner>(R.id.savedPlayerSpinner).setSelection(selectedIndex)
+                    selectPlayer(players[selectedIndex])
+                }
+            }
+        }
+    }
+
+    private fun selectPlayer(player: PlayerEntity) {
+        activePlayer = player
+        Toast.makeText(
+            this,
+            getString(R.string.player_selected, player.fullName),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
     private fun bindSetting(
         seekBarId: Int,
         valueId: Int,
@@ -264,7 +316,6 @@ class MainActivity : AppCompatActivity() {
         ) getString(R.string.male) else getString(R.string.female)
         val course = findViewById<Spinner>(R.id.courseSpinner).selectedItemPosition + 1
         val difficulty = findViewById<SeekBar>(R.id.difficultySeekBar).progress + 1
-        val difficultyName = resources.getStringArray(R.array.difficulty_levels)[difficulty - 1]
         val birthDateText = getString(
             R.string.selected_birth_date,
             birthDate.get(Calendar.DAY_OF_MONTH),
@@ -276,7 +327,34 @@ class MainActivity : AppCompatActivity() {
             birthDate.get(Calendar.DAY_OF_MONTH)
         )
         val player = Player(fullName, gender, course, difficulty, birthDateText, zodiacSign)
+        val entity = PlayerEntity(
+            0,
+            player.fullName,
+            player.gender,
+            player.course,
+            player.difficulty,
+            player.birthDate,
+            player.zodiacSign
+        )
+        databaseExecutor.execute {
+            val insertedId = database.gameDao().insertPlayer(entity)
+            val savedPlayer = if (insertedId > 0) {
+                entity.apply { id = insertedId }
+            } else {
+                database.gameDao().findPlayerByName(fullName)
+            }
+            savedPlayer?.let {
+                runOnUiThread {
+                    displayPlayer(it)
+                    reloadPlayers(it.id)
+                }
+            }
+        }
+    }
 
+    private fun displayPlayer(player: PlayerEntity) {
+        val difficultyName = resources.getStringArray(R.array.difficulty_levels)
+            .getOrElse(player.difficulty - 1) { player.difficulty.toString() }
         findViewById<TextView>(R.id.resultText).apply {
             text = getString(
                 R.string.player_result,
@@ -289,7 +367,7 @@ class MainActivity : AppCompatActivity() {
             )
             visibility = View.VISIBLE
         }
-        findViewById<ImageView>(R.id.zodiacImage).setImageBitmap(zodiacBitmap(zodiacSign))
+        findViewById<ImageView>(R.id.zodiacImage).setImageBitmap(zodiacBitmap(player.zodiacSign))
         findViewById<FrameLayout>(R.id.zodiacContainer).visibility = View.VISIBLE
     }
 
@@ -318,6 +396,11 @@ class MainActivity : AppCompatActivity() {
             cellWidth,
             cellHeight
         )
+    }
+
+    override fun onDestroy() {
+        databaseExecutor.shutdown()
+        super.onDestroy()
     }
 
     private companion object {
