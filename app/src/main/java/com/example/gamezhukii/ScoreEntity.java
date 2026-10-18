@@ -13,7 +13,7 @@ import androidx.room.PrimaryKey;
                 childColumns = "playerId",
                 onDelete = ForeignKey.CASCADE
         ),
-        indices = {@Index("playerId")}
+        indices = {@Index(value = {"playerId"}, unique = true)}
 )
 public class ScoreEntity {
     @PrimaryKey(autoGenerate = true)

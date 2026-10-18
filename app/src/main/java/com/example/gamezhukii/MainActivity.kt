@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val databaseExecutor = Executors.newSingleThreadExecutor()
     private var savedPlayers: List<PlayerEntity> = emptyList()
     private var activePlayer: PlayerEntity? = null
+    private var roundPlayer: PlayerEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,9 +137,11 @@ class MainActivity : AppCompatActivity() {
                 stats.accuracy
             )
             resultPanel.visibility = View.VISIBLE
+            saveRoundResult(stats)
         }
         startButton.setOnClickListener {
             if (activePlayer == null) return@setOnClickListener
+            roundPlayer = activePlayer
             val preferences = getSharedPreferences(SETTINGS_NAME, MODE_PRIVATE)
             gameView.start(
                 GameConfig(
@@ -249,6 +252,28 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.select_player_before_game)
         } else {
             getString(R.string.active_player, player.fullName)
+        }
+    }
+
+    private fun saveRoundResult(stats: GameStats) {
+        val player = roundPlayer ?: return
+        databaseExecutor.execute {
+            val playedAt = System.currentTimeMillis()
+            val score = ScoreEntity(
+                0,
+                player.id,
+                stats.score,
+                player.difficulty,
+                playedAt
+            )
+            if (database.gameDao().insertScore(score) == -1L) {
+                database.gameDao().updateBestScore(
+                    player.id,
+                    stats.score,
+                    player.difficulty,
+                    playedAt
+                )
+            }
         }
     }
 

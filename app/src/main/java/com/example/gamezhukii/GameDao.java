@@ -18,8 +18,14 @@ public interface GameDao {
     @Query("SELECT * FROM players ORDER BY fullName COLLATE NOCASE")
     List<PlayerEntity> getPlayers();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insertScore(ScoreEntity score);
+
+    @Query(
+            "UPDATE scores SET points = :points, difficulty = :difficulty, playedAt = :playedAt " +
+            "WHERE playerId = :playerId AND points < :points"
+    )
+    int updateBestScore(long playerId, int points, int difficulty, long playedAt);
 
     @Query(
             "SELECT players.fullName AS playerName, scores.points, " +
