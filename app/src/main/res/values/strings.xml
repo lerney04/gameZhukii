@@ -2,6 +2,7 @@
     <string name="app_name">Жуки</string>
     <string name="tab_game">Игра</string>
     <string name="tab_registration">Игрок</string>
+    <string name="tab_records">Рекорды</string>
     <string name="tab_rules">Правила</string>
     <string name="tab_authors">Авторы</string>
     <string name="tab_settings">Настройки</string>
@@ -16,6 +17,10 @@
     <string name="play_again">Играть ещё раз</string>
     <string name="round_finished">Раунд завершён</string>
     <string name="game_result">Очки: %1$d\nПопадания: %2$d\nПромахи: %3$d\nТочность: %4$d%%</string>
+    <string name="no_records">Сыграйте первый раунд — здесь появится результат</string>
+    <string name="records_difficulty_filter">Сложность игрока</string>
+    <string name="all_difficulties">Все сложности</string>
+    <string name="record_item">%1$s\nОчки: %2$d · Сложность: %3$s\n%4$s</string>
     <string name="authors_title">Авторы приложения</string>
     <string name="author_photo">Фотография автора</string>
     <string name="author_polkovnikov">Полковников Даниил Романович</string>

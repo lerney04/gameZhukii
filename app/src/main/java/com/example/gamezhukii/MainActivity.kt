@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ArrayAdapter
+import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -23,6 +24,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.tabs.TabLayout
 import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.Executors
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var savedPlayers: List<PlayerEntity> = emptyList()
     private var activePlayer: PlayerEntity? = null
     private var roundPlayer: PlayerEntity? = null
+    private var loadedRecords: List<RecordEntry> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +66,7 @@ class MainActivity : AppCompatActivity() {
             setupAuthors()
             setupGameSettings()
             setupPlayerSelection()
+            setupRecords()
 
             val difficultyValue = findViewById<TextView>(R.id.difficultyValue)
             val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
@@ -93,6 +99,7 @@ class MainActivity : AppCompatActivity() {
         val layouts = listOf(
             R.layout.tab_game,
             R.layout.tab_registration,
+            R.layout.tab_records,
             R.layout.tab_rules,
             R.layout.tab_authors,
             R.layout.tab_settings
@@ -105,8 +112,9 @@ class MainActivity : AppCompatActivity() {
                 when (position) {
                     0 -> R.string.tab_game
                     1 -> R.string.tab_registration
-                    2 -> R.string.tab_rules
-                    3 -> R.string.tab_authors
+                    2 -> R.string.tab_records
+                    3 -> R.string.tab_rules
+                    4 -> R.string.tab_authors
                     else -> R.string.tab_settings
                 }
             )
@@ -212,6 +220,73 @@ class MainActivity : AppCompatActivity() {
         reloadPlayers()
     }
 
+    private fun setupRecords() {
+        val difficultyNames = listOf(getString(R.string.all_difficulties)) +
+            resources.getStringArray(R.array.difficulty_levels)
+        findViewById<Spinner>(R.id.recordsDifficultySpinner).apply {
+            adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                difficultyNames
+            )
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    displayRecords(position.takeIf { it > 0 })
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+        reloadRecords()
+    }
+
+    private fun reloadRecords() {
+        databaseExecutor.execute {
+            val records = database.gameDao().records
+            runOnUiThread {
+                loadedRecords = records
+                val selectedDifficulty = findViewById<Spinner>(R.id.recordsDifficultySpinner)
+                    .selectedItemPosition
+                    .takeIf { it > 0 }
+                displayRecords(selectedDifficulty)
+            }
+        }
+    }
+
+    private fun displayRecords(difficulty: Int?) {
+        val difficultyLevels = resources.getStringArray(R.array.difficulty_levels)
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+        val rows = loadedRecords
+            .filter { difficulty == null || it.difficulty == difficulty }
+            .map { record ->
+                val difficultyName = difficultyLevels.getOrElse(record.difficulty - 1) {
+                    record.difficulty.toString()
+                }
+                getString(
+                    R.string.record_item,
+                    record.playerName,
+                    record.points,
+                    difficultyName,
+                    dateFormat.format(Date(record.playedAt))
+                )
+            }
+        findViewById<ListView>(R.id.recordsList).apply {
+            adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_list_item_1,
+                rows
+            )
+            visibility = if (rows.isEmpty()) View.GONE else View.VISIBLE
+        }
+        findViewById<TextView>(R.id.recordsEmpty).visibility =
+            if (rows.isEmpty()) View.VISIBLE else View.GONE
+    }
+
     private fun reloadPlayers(selectedPlayerId: Long? = null) {
         databaseExecutor.execute {
             val players = database.gameDao().players
@@ -274,6 +349,7 @@ class MainActivity : AppCompatActivity() {
                     playedAt
                 )
             }
+            reloadRecords()
         }
     }
 
