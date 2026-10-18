@@ -39,12 +39,16 @@ class MainActivity : AppCompatActivity() {
     private var activePlayer: PlayerEntity? = null
     private var roundPlayer: PlayerEntity? = null
     private var loadedRecords: List<RecordEntry> = emptyList()
+    private var restoredPlayerId: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         database = AppDatabase.getInstance(this)
+        restoredPlayerId = savedInstanceState
+            ?.getLong(ACTIVE_PLAYER_ID_KEY, NO_PLAYER)
+            ?.takeIf { it != NO_PLAYER }
         val savedDate = savedInstanceState?.getLong(BIRTH_DATE_KEY, NO_DATE) ?: NO_DATE
         selectedBirthDate = Calendar.getInstance().apply {
             if (savedDate != NO_DATE) {
@@ -217,7 +221,7 @@ class MainActivity : AppCompatActivity() {
                 displayPlayer(player)
             }
         }
-        reloadPlayers()
+        reloadPlayers(restoredPlayerId)
     }
 
     private fun setupRecords() {
@@ -312,6 +316,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun selectPlayer(player: PlayerEntity) {
         activePlayer = player
+        restoredPlayerId = player.id
         updateGameAccess()
         Toast.makeText(
             this,
@@ -384,6 +389,7 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putLong(BIRTH_DATE_KEY, selectedBirthDate?.timeInMillis ?: NO_DATE)
+        outState.putLong(ACTIVE_PLAYER_ID_KEY, activePlayer?.id ?: NO_PLAYER)
     }
 
     private fun showBirthDatePicker() {
@@ -520,7 +526,9 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val BIRTH_DATE_KEY = "birth_date"
+        const val ACTIVE_PLAYER_ID_KEY = "active_player_id"
         const val NO_DATE = -1L
+        const val NO_PLAYER = -1L
         const val SETTINGS_NAME = "game_settings"
         const val SPEED_KEY = "game_speed"
         const val COCKROACHES_KEY = "max_cockroaches"
