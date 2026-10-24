@@ -22,6 +22,26 @@ class GameEngine(
 
     private var nextId = 1L
     private var spawnElapsed = 0f
+    private var bonusElapsed = 0f
+    var bonusAvailable = false
+        private set
+    var tiltEnabled = false
+        private set
+    var bonusX = 0.5f
+        private set
+    var bonusY = 0.5f
+        private set
+    private var bonusRemaining = 0f
+    var tiltX = 0f
+    var tiltY = 0f
+
+    fun collectBonus(): Boolean {
+        if (!bonusAvailable || isFinished) return false
+        bonusAvailable = false
+        tiltEnabled = true
+        bonusRemaining = 5f
+        return true
+    }
 
     val isFinished: Boolean
         get() = elapsedSeconds >= config.roundDurationSeconds
@@ -33,6 +53,12 @@ class GameEngine(
         misses = 0
         elapsedSeconds = 0f
         spawnElapsed = 0f
+        bonusElapsed = 0f
+        bonusAvailable = false
+        tiltEnabled = false
+        bonusRemaining = 0f
+        tiltX = 0f
+        tiltY = 0f
         nextId = 1L
         repeat(minOf(3, config.maxBugs)) { spawnRandomBug() }
     }
@@ -42,7 +68,29 @@ class GameEngine(
 
         elapsedSeconds = (elapsedSeconds + deltaSeconds)
             .coerceAtMost(config.roundDurationSeconds.toFloat())
-        bugs.forEach { it.move(deltaSeconds, config.speedMultiplier) }
+        val activeDelta = minOf(deltaSeconds, bonusRemaining)
+        bugs.forEach {
+            if (tiltEnabled) {
+                it.x = (it.x + tiltX * activeDelta * 0.6f)
+                    .coerceIn(it.type.radius, 1f - it.type.radius)
+                it.y = (it.y + tiltY * activeDelta * 0.6f)
+                    .coerceIn(it.type.radius, 1f - it.type.radius)
+                if (deltaSeconds > activeDelta) {
+                    it.move(deltaSeconds - activeDelta, config.speedMultiplier)
+                }
+            } else {
+                it.move(deltaSeconds, config.speedMultiplier)
+            }
+        }
+        bonusRemaining = (bonusRemaining - deltaSeconds).coerceAtLeast(0f)
+        tiltEnabled = bonusRemaining > 0f && !isFinished
+        bonusElapsed += deltaSeconds
+        if (bonusElapsed >= config.bonusIntervalSeconds.coerceAtLeast(1) && !isFinished) {
+            bonusElapsed %= config.bonusIntervalSeconds.coerceAtLeast(1).toFloat()
+            bonusAvailable = true
+            bonusX = 0.12f + random.nextFloat() * 0.76f
+            bonusY = 0.12f + random.nextFloat() * 0.76f
+        }
 
         spawnElapsed += deltaSeconds
         val spawnDelay = (1.4f / config.speedMultiplier).coerceAtLeast(0.35f)
