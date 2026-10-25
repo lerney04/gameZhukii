@@ -10,13 +10,27 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.view.Surface
+import android.widget.Toast
 import kotlin.math.atan2
 import kotlin.math.sin
 
 class GameView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : View(context, attrs) {
+) : View(context, attrs), SensorEventListener {
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
+        ?: sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    private val scream = BugScream(context)
+    private val bonusBitmap: Bitmap by lazy {
+        BitmapFactory.decodeResource(resources, R.drawable.bonus)
+    }
+    private val bonusBounds = RectF()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val bugBitmaps: Map<BugType, Bitmap> by lazy {
         mapOf(
@@ -33,15 +47,47 @@ class GameView @JvmOverloads constructor(
     var onRoundFinished: ((GameStats) -> Unit)? = null
 
     fun start(config: GameConfig) {
+        stop()
         engine = GameEngine(config).also { it.reset() }
         running = true
         lastFrameNanos = 0L
+        gravitySensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
         onStatsChanged?.invoke(engine!!.stats())
         postInvalidateOnAnimation()
     }
 
     fun stop() {
         running = false
+        sensorManager.unregisterListener(this)
+        scream.release()
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        val x = event.values[0] / SensorManager.GRAVITY_EARTH
+        val y = event.values[1] / SensorManager.GRAVITY_EARTH
+        val (screenX, screenY) = when (display?.rotation) {
+            Surface.ROTATION_90 -> y to x
+            Surface.ROTATION_180 -> x to -y
+            Surface.ROTATION_270 -> -y to -x
+            else -> -x to y
+        }
+        engine?.apply {
+            tiltX += (screenX - tiltX) * 0.2f
+            tiltY += (screenY - tiltY) * 0.2f
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility != VISIBLE) {
+            sensorManager.unregisterListener(this)
+            scream.release()
+        } else if (running) {
+            lastFrameNanos = 0L
+            gravitySensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -59,10 +105,24 @@ class GameView @JvmOverloads constructor(
         }
 
         currentEngine.bugs.forEach { drawBug(canvas, it) }
+        val bonusSize = minOf(width, height) * 0.20f
+        val bonusLeft = (currentEngine.bonusX * width - bonusSize / 2f)
+            .coerceIn(0f, (width - bonusSize).coerceAtLeast(0f))
+        val bonusTop = (currentEngine.bonusY * height - bonusSize / 2f)
+            .coerceIn(0f, (height - bonusSize).coerceAtLeast(0f))
+        bonusBounds.set(bonusLeft, bonusTop, bonusLeft + bonusSize, bonusTop + bonusSize)
+        if (currentEngine.bonusAvailable) {
+            canvas.drawBitmap(bonusBitmap, null, bonusBounds, paint)
+        }
+        if (running && windowVisibility == VISIBLE && currentEngine.tiltEnabled) {
+            scream.play()
+        } else {
+            scream.release()
+        }
         onStatsChanged?.invoke(currentEngine.stats())
 
         if (running && currentEngine.isFinished) {
-            running = false
+            stop()
             onRoundFinished?.invoke(currentEngine.stats())
         } else if (running) {
             postInvalidateOnAnimation()
@@ -73,7 +133,15 @@ class GameView @JvmOverloads constructor(
         if (event.action != MotionEvent.ACTION_DOWN || !running || width == 0 || height == 0) {
             return true
         }
-        engine?.tap(event.x / width, event.y / height)
+        if (engine?.bonusAvailable == true && bonusBounds.contains(event.x, event.y)) {
+            if (gravitySensor == null) {
+                Toast.makeText(context, R.string.no_tilt_sensor, Toast.LENGTH_SHORT).show()
+            } else if (engine?.collectBonus() == true) {
+                scream.play()
+            }
+        } else {
+            engine?.tap(event.x / width, event.y / height)
+        }
         engine?.stats()?.let { onStatsChanged?.invoke(it) }
         performClick()
         invalidate()
