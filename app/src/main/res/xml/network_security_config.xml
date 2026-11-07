@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Official HARICA root: https://repo.harica.gr/certs/HARICA-TLS-Root-2021-RSA.cer
+         SHA-1: 022D0582FA88CE140C0679DE7F1410E945D7A56D.
+         Needed by devices whose system store lacks this root. Trust is limited to CBR. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">cbr.ru</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/harica_tls_root_2021_rsa" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

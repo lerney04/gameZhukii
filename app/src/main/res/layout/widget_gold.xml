@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:id="@+id/widgetGoldBall"
+        android:layout_width="160dp" android:layout_height="160dp"
+        android:layout_gravity="center" android:background="@drawable/gold_ball"
+        android:orientation="vertical" android:gravity="center" android:padding="12dp"
+        android:contentDescription="@string/gold_widget_refresh">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/gold_widget_title" android:textColor="#463000"
+            android:textStyle="bold" android:textSize="18sp" />
+        <TextView android:id="@+id/widgetGoldPrice" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:gravity="center"
+            android:text="@string/gold_no_data" android:textColor="#241900"
+            android:textStyle="bold" android:textSize="16sp" android:layout_marginTop="8dp" />
+        <TextView android:id="@+id/widgetGoldDate" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="@string/gold_waiting"
+            android:textColor="#463000" android:textSize="12sp" android:layout_marginTop="6dp" />
+    </LinearLayout>
+</FrameLayout>

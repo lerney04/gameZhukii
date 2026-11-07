@@ -1,4 +1,11 @@
 <resources>
+    <string name="gold_widget_title">Золото ЦБ</string>
+    <string name="gold_widget_description">Круглый виджет с ценой золота за грамм</string>
+    <string name="gold_widget_refresh">Нажмите, чтобы обновить курс золота</string>
+    <string name="gold_no_data">Нет курса</string>
+    <string name="gold_waiting">Ожидание сети</string>
+    <string name="gold_game_status">Золото ЦБ: %1$.2f ₽/г (%2$s) · +%3$d очков</string>
+    <string name="gold_game_unavailable">Курс золота ещё не загружен. Золотой таракан появится после загрузки.</string>
     <string name="tilt_bonus">Наклон!</string>
     <string name="no_tilt_sensor">На устройстве нет датчика наклона</string>
     <string name="app_name">Жуки</string>
