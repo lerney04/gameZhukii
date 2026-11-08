@@ -38,6 +38,16 @@
         android:text="@string/select_player_before_game"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
+    <TextView
+        android:id="@+id/goldQuoteText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="8dp"
+        android:gravity="center"
+        android:text="@string/gold_game_unavailable"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

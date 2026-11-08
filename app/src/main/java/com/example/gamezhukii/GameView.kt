@@ -45,10 +45,21 @@ class GameView @JvmOverloads constructor(
 
     var onStatsChanged: ((GameStats) -> Unit)? = null
     var onRoundFinished: ((GameStats) -> Unit)? = null
+    var onGoldQuoteChanged: ((GoldQuote?) -> Unit)? = null
 
     fun start(config: GameConfig) {
         stop()
-        engine = GameEngine(config).also { it.reset() }
+        engine = GameEngine(config.copy(goldReward = GoldPriceRepository.cached(context)?.reward ?: 0))
+            .also { it.reset() }
+        val startedEngine = engine
+        GoldPriceRepository.refresh(context) { quote ->
+            post {
+                if (engine === startedEngine && quote != null) {
+                    startedEngine?.goldReward = quote.reward
+                }
+                onGoldQuoteChanged?.invoke(quote)
+            }
+        }
         running = true
         lastFrameNanos = 0L
         gravitySensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
@@ -163,6 +174,10 @@ class GameView @JvmOverloads constructor(
         val centerX = bug.x * width
         val centerY = bug.y * height
         val radius = bug.type.radius * minOf(width, height)
+        if (bug.type == BugType.GOLD) {
+            drawGoldBug(canvas, centerX, centerY, radius)
+            return
+        }
         val angle = Math.toDegrees(atan2(bug.velocityY, bug.velocityX).toDouble()).toFloat() + 90f
         val wiggle = sin(System.nanoTime() / 70_000_000.0).toFloat() * 7f
         val bitmap = bugBitmaps.getValue(bug.type)
@@ -185,5 +200,26 @@ class GameView @JvmOverloads constructor(
         )
         canvas.restore()
 
+    }
+
+    private fun drawGoldBug(canvas: Canvas, x: Float, y: Float, radius: Float) {
+        paint.color = Color.rgb(103, 66, 9)
+        paint.strokeWidth = radius * 0.1f
+        for (side in listOf(-1, 1)) {
+            for (leg in -1..1) {
+                canvas.drawLine(x + side * radius * 0.5f, y + leg * radius * 0.45f,
+                    x + side * radius, y + leg * radius * 0.65f, paint)
+            }
+            canvas.drawLine(x + side * radius * 0.2f, y - radius * 0.75f,
+                x + side * radius * 0.55f, y - radius * 1.15f, paint)
+        }
+        paint.color = Color.rgb(231, 177, 28)
+        canvas.drawOval(x - radius * 0.6f, y - radius * 0.8f,
+            x + radius * 0.6f, y + radius, paint)
+        paint.color = Color.rgb(255, 227, 118)
+        canvas.drawOval(x - radius * 0.4f, y - radius * 0.6f,
+            x - radius * 0.1f, y + radius * 0.65f, paint)
+        paint.color = Color.rgb(103, 66, 9)
+        canvas.drawLine(x, y - radius * 0.6f, x, y + radius * 0.9f, paint)
     }
 }

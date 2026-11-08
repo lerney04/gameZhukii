@@ -23,6 +23,8 @@ class GameEngine(
     private var nextId = 1L
     private var spawnElapsed = 0f
     private var bonusElapsed = 0f
+    private var goldElapsed = 0f
+    var goldReward: Int = config.goldReward
     var bonusAvailable = false
         private set
     var tiltEnabled = false
@@ -54,6 +56,7 @@ class GameEngine(
         elapsedSeconds = 0f
         spawnElapsed = 0f
         bonusElapsed = 0f
+        goldElapsed = 0f
         bonusAvailable = false
         tiltEnabled = false
         bonusRemaining = 0f
@@ -92,6 +95,17 @@ class GameEngine(
             bonusY = 0.12f + random.nextFloat() * 0.76f
         }
 
+        goldElapsed += deltaSeconds
+        if (goldElapsed >= 20f && !isFinished) {
+            goldElapsed %= 20f
+            if (goldReward > 0) {
+                if (bugs.size >= config.maxBugs) {
+                    bugs.remove(bugs.firstOrNull { it.type != BugType.GOLD } ?: bugs.first())
+                }
+                spawnBug(BugType.GOLD)
+            }
+        }
+
         spawnElapsed += deltaSeconds
         val spawnDelay = (1.4f / config.speedMultiplier).coerceAtLeast(0.35f)
         if (spawnElapsed >= spawnDelay && bugs.size < config.maxBugs) {
@@ -106,7 +120,7 @@ class GameEngine(
         return if (bug != null) {
             bugs.remove(bug)
             hits++
-            score += bug.type.points
+            score += bug.points
             bug.type
         } else {
             misses++
@@ -143,7 +157,8 @@ class GameEngine(
             x = radius + random.nextFloat() * (1f - radius * 2f),
             y = radius + random.nextFloat() * (1f - radius * 2f),
             velocityX = cos(angle),
-            velocityY = sin(angle)
+            velocityY = sin(angle),
+            points = if (type == BugType.GOLD) goldReward else type.points
         )
     }
 

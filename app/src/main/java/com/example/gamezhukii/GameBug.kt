@@ -8,7 +8,8 @@ data class GameBug(
     var x: Float,
     var y: Float,
     var velocityX: Float,
-    var velocityY: Float
+    var velocityY: Float,
+    val points: Int = type.points
 ) {
     fun move(deltaSeconds: Float, speedMultiplier: Float) {
         x += velocityX * type.speed * speedMultiplier * deltaSeconds

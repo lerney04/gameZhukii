@@ -4,7 +4,8 @@ data class GameConfig(
     val speedMultiplier: Float,
     val maxBugs: Int,
     val bonusIntervalSeconds: Int,
-    val roundDurationSeconds: Int
+    val roundDurationSeconds: Int,
+    val goldReward: Int = 0
 )
 
 data class GameStats(

@@ -127,6 +127,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupGame() {
         val gameView = findViewById<GameView>(R.id.gameView)
+        val goldText = findViewById<TextView>(R.id.goldQuoteText)
+        val showQuote: (GoldQuote?) -> Unit = { quote ->
+            goldText.text = if (quote == null) getString(R.string.gold_game_unavailable)
+            else getString(R.string.gold_game_status, quote.rublesPerGram, quote.date, quote.reward)
+        }
+        showQuote(GoldPriceRepository.cached(this))
+        gameView.onGoldQuoteChanged = showQuote
+        GoldPriceRepository.refresh(this) { quote ->
+            runOnUiThread { if (!isDestroyed) showQuote(quote) }
+        }
         val scoreView = findViewById<TextView>(R.id.gameScore)
         val timeView = findViewById<TextView>(R.id.gameTime)
         val startButton = findViewById<Button>(R.id.startGameButton)

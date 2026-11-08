@@ -8,6 +8,32 @@ import kotlin.random.Random
 
 class GameEngineTest {
     @Test
+    fun goldSpawnsEveryTwentySecondsWithinLimitAndKeepsItsReward() {
+        val engine = GameEngine(config.copy(maxBugs = 1, roundDurationSeconds = 90, goldReward = 108))
+        engine.reset()
+        engine.update(19f)
+        assertFalse(engine.bugs.any { it.type == BugType.GOLD })
+        engine.update(1f)
+        val gold = engine.bugs.single()
+        assertEquals(BugType.GOLD, gold.type)
+        engine.goldReward = 200
+        assertEquals(BugType.GOLD, engine.tap(gold.x, gold.y))
+        assertEquals(108, engine.score)
+        engine.update(20f)
+        assertEquals(BugType.GOLD, engine.bugs.single().type)
+        assertEquals(200, engine.bugs.single().points)
+        engine.reset()
+        assertFalse(engine.bugs.any { it.type == BugType.GOLD })
+    }
+
+    @Test
+    fun goldDoesNotSpawnWithoutRealQuote() {
+        val engine = GameEngine(config.copy(roundDurationSeconds = 90))
+        engine.reset()
+        engine.update(20f)
+        assertFalse(engine.bugs.any { it.type == BugType.GOLD })
+    }
+    @Test
     fun bonusAppearsEveryFifteenSecondsAndResetsWithRound() {
         val engine = GameEngine(config.copy(roundDurationSeconds = 90))
         engine.reset()
